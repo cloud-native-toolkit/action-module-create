@@ -1,11 +1,26 @@
-name: 'Your name here'
-description: 'Provide a description here'
+name: 'Create Module'
+description: 'Action to create an automation module from one of the availble templates'
 author: 'Your name or organization here'
 inputs:
-  milliseconds: # change this
+  token:
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+    description: GitHub token with the access necessary to provision a new repository in the target org
+  type:
+    required: true
+    description: the type of module (terraform or gitops)
+  name:
+    required: true
+    description: The name of the new repository that will be created
+  provider:
+    required: false
+    description: The cloud provider this module will work against
+  owner:
+    required: true
+    description: The github organization where the new repository should be created
+    default: cloud-native-toolkit
+outputs:
+  repo_url:
+    description: The url of the created repository
 runs:
   using: 'node12'
   main: 'dist/index.js'
