@@ -241,7 +241,9 @@ class ModuleRepo {
                 source: { branch: 'gh-pages' }
             };
             this.logger.info(`Setting GitHub Pages for repo ${this.owner}/${this.repo}`);
-            yield this.octokit.request('POST /repos/{owner}/{repo}/pages', pagesParams);
+            yield this.octokit
+                .request('POST /repos/{owner}/{repo}/pages', pagesParams)
+                .catch(() => ({}));
         });
     }
     createInitialRelease() {

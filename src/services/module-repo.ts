@@ -217,7 +217,9 @@ export class ModuleRepo {
       source: {branch: 'gh-pages'}
     }
     this.logger.info(`Setting GitHub Pages for repo ${this.owner}/${this.repo}`)
-    await this.octokit.request('POST /repos/{owner}/{repo}/pages', pagesParams)
+    await this.octokit
+      .request('POST /repos/{owner}/{repo}/pages', pagesParams)
+      .catch(() => ({}))
   }
 
   async createInitialRelease(): Promise<void> {
