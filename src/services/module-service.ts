@@ -9,11 +9,11 @@ interface TemplateRepo {
 const templateRepos: {[type: string]: TemplateRepo} = {
   gitops: {
     template_owner: 'cloud-native-toolkit',
-    template_repo: 'template-gitops-module'
+    template_repo: 'template-terraform-gitops'
   },
   terraform: {
     template_owner: 'cloud-native-toolkit',
-    template_repo: 'template-gitops-module'
+    template_repo: 'template-terraform-module'
   }
 }
 
