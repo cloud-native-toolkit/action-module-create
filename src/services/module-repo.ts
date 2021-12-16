@@ -139,7 +139,9 @@ export class ModuleRepo {
       `Updating branch protection for repo ${this.owner}/${this.repo}`
     )
     const branchRules: BranchProtection[] = [
-      {branch: 'gh-pages'},
+      {
+        branch: 'gh-pages'
+      },
       {
         branch: 'main',
         required_status_checks: {

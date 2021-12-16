@@ -324,7 +324,7 @@ class ModuleService {
             const { name, description } = buildNameAndDescription(repoType, baseName, provider);
             const repo = yield module_repo_1.ModuleRepo.createFromTemplate(octokit, templateRepo, owner, name, description);
             yield repo.updateSettings();
-            // await repo.addBranchProtection()
+            yield repo.addBranchProtection();
             yield repo.addDefaultLabels();
             yield repo.createPagesSite();
             yield repo.createInitialRelease();
