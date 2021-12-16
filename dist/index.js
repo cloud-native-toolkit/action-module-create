@@ -174,13 +174,16 @@ class ModuleRepo {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 params)
                     .catch(error => {
-                    throw new Error(`    Error updating branch protection for ${params.branch} branch: ${error.message}`);
+                    var _a, _b;
+                    throw new Error(`    Error updating branch protection for ${params.branch} branch: ${error.message}, ${(_a = error.response) === null || _a === void 0 ? void 0 : _a.status}, ${(_b = error.response) === null || _b === void 0 ? void 0 : _b.text}`);
                 });
             });
             // Set https://docs.github.com/en/rest/reference/branches#update-branch-protection
             this.logger.info(`Updating branch protection for repo ${this.owner}/${this.repo}`);
             const branchRules = [
-                { branch: 'gh-pages' },
+                {
+                    branch: 'gh-pages'
+                },
                 {
                     branch: 'main',
                     required_status_checks: {

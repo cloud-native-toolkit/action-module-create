@@ -129,7 +129,7 @@ export class ModuleRepo {
         )
         .catch(error => {
           throw new Error(
-            `    Error updating branch protection for ${params.branch} branch: ${error.message}`
+            `    Error updating branch protection for ${params.branch} branch: ${error.message}, ${error.response?.status}, ${error.response?.text}`
           )
         })
     }
