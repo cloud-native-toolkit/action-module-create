@@ -168,12 +168,18 @@ class ModuleRepo {
                 const params = Object.assign({}, target, rule, {
                     contexts: (_a = rule.required_status_checks) === null || _a === void 0 ? void 0 : _a.checks.map(v => v.context)
                 });
-                return octokit.request('PUT /repos/{owner}/{repo}/branches/{branch}/protection', 
+                this.logger.info(`  Updating branch protection for ${params.branch} branch`);
+                return octokit
+                    .request('PUT /repos/{owner}/{repo}/branches/{branch}/protection', 
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                params);
+                params)
+                    .catch(error => {
+                    this.logger.error(`    Error updating branch protection for ${params.branch} branch`);
+                    throw error;
+                });
             });
             // Set https://docs.github.com/en/rest/reference/branches#update-branch-protection
-            this.logger.info(`Update branch protection for repo ${this.owner}/${this.repo}`);
+            this.logger.info(`Updating branch protection for repo ${this.owner}/${this.repo}`);
             const branchRules = [
                 { branch: 'gh-pages' },
                 {

@@ -118,16 +118,27 @@ export class ModuleRepo {
         contexts: rule.required_status_checks?.checks.map(v => v.context)
       })
 
-      return octokit.request(
-        'PUT /repos/{owner}/{repo}/branches/{branch}/protection',
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        params as any
+      this.logger.info(
+        `  Updating branch protection for ${params.branch} branch`
       )
+      return octokit
+        .request(
+          'PUT /repos/{owner}/{repo}/branches/{branch}/protection',
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          params as any
+        )
+        .catch(error => {
+          this.logger.error(
+            `    Error updating branch protection for ${params.branch} branch`
+          )
+
+          throw error
+        })
     }
 
     // Set https://docs.github.com/en/rest/reference/branches#update-branch-protection
     this.logger.info(
-      `Update branch protection for repo ${this.owner}/${this.repo}`
+      `Updating branch protection for repo ${this.owner}/${this.repo}`
     )
     const branchRules: BranchProtection[] = [
       {branch: 'gh-pages'},
