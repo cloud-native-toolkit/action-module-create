@@ -99,7 +99,7 @@ export class ModuleService {
 
     await repo.updateSettings()
 
-    await repo.addBranchProtection()
+    // await repo.addBranchProtection()
 
     await repo.addDefaultLabels()
 

@@ -128,11 +128,9 @@ export class ModuleRepo {
           params as any
         )
         .catch(error => {
-          this.logger.error(
-            `    Error updating branch protection for ${params.branch} branch`
+          throw new Error(
+            `    Error updating branch protection for ${params.branch} branch: ${error.message}`
           )
-
-          throw error
         })
     }
 

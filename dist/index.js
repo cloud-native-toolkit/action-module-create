@@ -174,8 +174,7 @@ class ModuleRepo {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 params)
                     .catch(error => {
-                    this.logger.error(`    Error updating branch protection for ${params.branch} branch`);
-                    throw error;
+                    throw new Error(`    Error updating branch protection for ${params.branch} branch: ${error.message}`);
                 });
             });
             // Set https://docs.github.com/en/rest/reference/branches#update-branch-protection
@@ -323,7 +322,7 @@ class ModuleService {
             const { name, description } = buildNameAndDescription(repoType, baseName, provider);
             const repo = yield module_repo_1.ModuleRepo.createFromTemplate(octokit, templateRepo, owner, name, description);
             yield repo.updateSettings();
-            yield repo.addBranchProtection();
+            // await repo.addBranchProtection()
             yield repo.addDefaultLabels();
             yield repo.createPagesSite();
             yield repo.createInitialRelease();
