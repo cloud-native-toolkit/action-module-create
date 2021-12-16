@@ -279,11 +279,11 @@ const module_repo_1 = __nccwpck_require__(1170);
 const templateRepos = {
     gitops: {
         template_owner: 'cloud-native-toolkit',
-        template_repo: 'template-gitops-module'
+        template_repo: 'template-terraform-gitops'
     },
     terraform: {
         template_owner: 'cloud-native-toolkit',
-        template_repo: 'template-gitops-module'
+        template_repo: 'template-terraform-module'
     }
 };
 const buildNameAndDescription = (repoType, baseName, provider) => {
