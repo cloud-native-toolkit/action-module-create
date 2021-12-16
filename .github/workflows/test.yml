@@ -27,7 +27,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: ./
         with:
-          token: ${{ secrets.TOKEN }}
+          token: ${{ secrets.GIT_ADMIN_TOKEN }}
           owner: cloud-native-toolkit-test
           provider: aws
           type: ${{ matrix.repo_type }}

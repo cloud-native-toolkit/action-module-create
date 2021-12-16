@@ -73,7 +73,7 @@ export class ModuleRepo {
     }
 
     // See https://docs.github.com/en/rest/reference/repos#create-a-repository-using-a-template
-    logger.debug(
+    logger.info(
       `Creating repo ${owner}/${name} from template ${templateRepo.template_owner}/${templateRepo.template_repo}`
     )
     await octokit.request(
@@ -94,7 +94,7 @@ export class ModuleRepo {
     }
 
     // See https://docs.github.com/en/rest/reference/repos#update-a-repository
-    this.logger.debug(`Updating repo ${this.owner}/${this.repo}`)
+    this.logger.info(`Updating repo ${this.owner}/${this.repo}`)
     await this.octokit.request('PATCH /repos/{owner}/{repo}', updateParams)
   }
 
@@ -126,7 +126,7 @@ export class ModuleRepo {
     }
 
     // Set https://docs.github.com/en/rest/reference/branches#update-branch-protection
-    this.logger.debug(
+    this.logger.info(
       `Update branch protection for repo ${this.owner}/${this.repo}`
     )
     const branchRules: BranchProtection[] = [
@@ -181,7 +181,7 @@ export class ModuleRepo {
 
     // See https://docs.github.com/en/rest/reference/issues#create-a-label
     // add labels
-    this.logger.debug(`Creating labels for repo ${this.owner}/${this.repo}`)
+    this.logger.info(`Creating labels for repo ${this.owner}/${this.repo}`)
     const labels: Label[] = [
       {name: 'major', description: 'Release: major (x.0.0)', color: '94FFA4'},
       {name: 'minor', description: 'Release: minor (0.x.0)', color: '94D5A4'},
@@ -207,9 +207,7 @@ export class ModuleRepo {
       repo: this.repo,
       source: {branch: 'gh-pages'}
     }
-    this.logger.debug(
-      `Setting GitHub Pages for repo ${this.owner}/${this.repo}`
-    )
+    this.logger.info(`Setting GitHub Pages for repo ${this.owner}/${this.repo}`)
     await this.octokit.request('POST /repos/{owner}/{repo}/pages', pagesParams)
   }
 
@@ -222,7 +220,7 @@ export class ModuleRepo {
       tag_name: 'v0.0.0',
       name: 'v0.0.0'
     }
-    this.logger.debug(
+    this.logger.info(
       `Creating initial release for repo ${this.owner}/${this.repo}`
     )
     await this.octokit.request(
