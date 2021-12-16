@@ -57,7 +57,7 @@ function run() {
                 repoType,
                 owner,
                 baseName,
-                provider,
+                provider
             });
             core.setOutput('repoUrl', repoUrl);
         }
@@ -138,6 +138,7 @@ class ModuleRepo {
             };
             // See https://docs.github.com/en/rest/reference/repos#create-a-repository-using-a-template
             logger.debug(`Creating repo ${owner}/${name} from template ${templateRepo.template_owner}/${templateRepo.template_repo}`);
+            logger.info(`Octokit keys: ${Object.keys(octokit)}`);
             yield octokit['repos'].createUsingTemplate(createParams);
             return new ModuleRepo(owner, name, octokit);
         });

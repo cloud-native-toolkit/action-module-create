@@ -76,6 +76,7 @@ export class ModuleRepo {
     logger.debug(
       `Creating repo ${owner}/${name} from template ${templateRepo.template_owner}/${templateRepo.template_repo}`
     )
+    logger.info(`Octokit keys: ${Object.keys(octokit)}`)
     await octokit['repos'].createUsingTemplate(createParams)
 
     return new ModuleRepo(owner, name, octokit)
