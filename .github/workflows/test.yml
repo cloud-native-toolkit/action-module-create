@@ -17,8 +17,18 @@ jobs:
           npm run all
   test: # make sure the action works on a clean machine without building
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        repo_type:
+          - gitops
+          - terraform
     steps:
       - uses: actions/checkout@v2
       - uses: ./
         with:
-          milliseconds: 1000
+          token: ${{ secrets.TOKEN }}
+          owner: cloud-native-toolkit-test
+          provider: aws
+          type: ${{ matrix.repo_type }}
+          name: action-test
