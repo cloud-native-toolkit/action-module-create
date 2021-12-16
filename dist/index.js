@@ -138,8 +138,7 @@ class ModuleRepo {
             };
             // See https://docs.github.com/en/rest/reference/repos#create-a-repository-using-a-template
             logger.debug(`Creating repo ${owner}/${name} from template ${templateRepo.template_owner}/${templateRepo.template_repo}`);
-            logger.info(`Octokit keys: ${Object.keys(octokit)}`);
-            yield octokit['repos'].createUsingTemplate(createParams);
+            yield octokit.request('POST /repos/{template_owner}/{template_repo}/generate', createParams);
             return new ModuleRepo(owner, name, octokit);
         });
     }
@@ -154,7 +153,7 @@ class ModuleRepo {
             };
             // See https://docs.github.com/en/rest/reference/repos#update-a-repository
             this.logger.debug(`Updating repo ${this.owner}/${this.repo}`);
-            yield this.octokit['repos'].update(updateParams);
+            yield this.octokit.request('PATCH /repos/{owner}/{repo}', updateParams);
         });
     }
     addBranchProtection() {
@@ -169,8 +168,9 @@ class ModuleRepo {
                 const params = Object.assign({}, target, rule, {
                     contexts: (_a = rule.required_status_checks) === null || _a === void 0 ? void 0 : _a.checks.map(v => v.context)
                 });
+                return octokit.request('PUT /repos/{owner}/{repo}/branches/{branch}/protection', 
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                return octokit['repos'].updateBranchProtection(params);
+                params);
             });
             // Set https://docs.github.com/en/rest/reference/branches#update-branch-protection
             this.logger.debug(`Update branch protection for repo ${this.owner}/${this.repo}`);
@@ -208,7 +208,7 @@ class ModuleRepo {
                     description: label.description,
                     color: label.color
                 };
-                return octokit['issues'].createLabel(params);
+                return octokit.request('POST /repos/{owner}/{repo}/labels', params);
             });
             // See https://docs.github.com/en/rest/reference/issues#create-a-label
             // add labels
@@ -236,7 +236,7 @@ class ModuleRepo {
                 source: { branch: 'gh-pages' }
             };
             this.logger.debug(`Setting GitHub Pages for repo ${this.owner}/${this.repo}`);
-            yield this.octokit['repos'].createPagesSite(pagesParams);
+            yield this.octokit.request('POST /repos/{owner}/{repo}/pages', pagesParams);
         });
     }
     createInitialRelease() {
@@ -250,7 +250,7 @@ class ModuleRepo {
                 name: 'v0.0.0'
             };
             this.logger.debug(`Creating initial release for repo ${this.owner}/${this.repo}`);
-            yield this.octokit['repos'].createRelease(releaseParams);
+            yield this.octokit.request('POST /repos/{owner}/{repo}/releases', releaseParams);
         });
     }
 }

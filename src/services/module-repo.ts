@@ -76,8 +76,10 @@ export class ModuleRepo {
     logger.debug(
       `Creating repo ${owner}/${name} from template ${templateRepo.template_owner}/${templateRepo.template_repo}`
     )
-    logger.info(`Octokit keys: ${Object.keys(octokit)}`)
-    await octokit['repos'].createUsingTemplate(createParams)
+    await octokit.request(
+      'POST /repos/{template_owner}/{template_repo}/generate',
+      createParams
+    )
 
     return new ModuleRepo(owner, name, octokit)
   }
@@ -93,7 +95,7 @@ export class ModuleRepo {
 
     // See https://docs.github.com/en/rest/reference/repos#update-a-repository
     this.logger.debug(`Updating repo ${this.owner}/${this.repo}`)
-    await this.octokit['repos'].update(updateParams)
+    await this.octokit.request('PATCH /repos/{owner}/{repo}', updateParams)
   }
 
   async addBranchProtection(): Promise<void> {
@@ -116,8 +118,11 @@ export class ModuleRepo {
         contexts: rule.required_status_checks?.checks.map(v => v.context)
       })
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return octokit['repos'].updateBranchProtection(params as any)
+      return octokit.request(
+        'PUT /repos/{owner}/{repo}/branches/{branch}/protection',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        params as any
+      )
     }
 
     // Set https://docs.github.com/en/rest/reference/branches#update-branch-protection
@@ -171,7 +176,7 @@ export class ModuleRepo {
         color: label.color
       }
 
-      return octokit['issues'].createLabel(params)
+      return octokit.request('POST /repos/{owner}/{repo}/labels', params)
     }
 
     // See https://docs.github.com/en/rest/reference/issues#create-a-label
@@ -205,7 +210,7 @@ export class ModuleRepo {
     this.logger.debug(
       `Setting GitHub Pages for repo ${this.owner}/${this.repo}`
     )
-    await this.octokit['repos'].createPagesSite(pagesParams)
+    await this.octokit.request('POST /repos/{owner}/{repo}/pages', pagesParams)
   }
 
   async createInitialRelease(): Promise<void> {
@@ -220,6 +225,9 @@ export class ModuleRepo {
     this.logger.debug(
       `Creating initial release for repo ${this.owner}/${this.repo}`
     )
-    await this.octokit['repos'].createRelease(releaseParams)
+    await this.octokit.request(
+      'POST /repos/{owner}/{repo}/releases',
+      releaseParams
+    )
   }
 }
