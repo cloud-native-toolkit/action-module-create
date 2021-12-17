@@ -174,7 +174,7 @@ class ModuleRepo {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 params)
                     .catch(error => {
-                    throw new Error(`    Error updating branch protection for ${params.branch} branch: ${JSON.stringify(error.message, null, 2)}`);
+                    throw new Error(`    Error updating branch protection for ${params.branch} branch: ${JSON.stringify(error, null, 2)}`);
                 });
             });
             // Set https://docs.github.com/en/rest/reference/branches#update-branch-protection

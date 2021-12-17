@@ -131,7 +131,7 @@ export class ModuleRepo {
           throw new Error(
             `    Error updating branch protection for ${
               params.branch
-            } branch: ${JSON.stringify(error.message, null, 2)}`
+            } branch: ${JSON.stringify(error, null, 2)}`
           )
         })
     }
