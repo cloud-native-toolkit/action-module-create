@@ -62,7 +62,7 @@ function run() {
                 provider,
                 strict
             });
-            core.setOutput('repoUrl', repoUrl);
+            core.setOutput('repo_url', repoUrl);
         }
         catch (error) {
             if (error instanceof Error)
