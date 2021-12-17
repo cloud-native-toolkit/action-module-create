@@ -207,17 +207,6 @@ class ModuleRepo {
                 });
             };
             const updateBranchProtection = (octokit, target, rule) => __awaiter(this, void 0, void 0, function* () {
-                try {
-                    yield octokit.request('GET /repos/{owner}/{repo}/branches/{branch}', {
-                        owner: target.owner,
-                        repo: target.repo,
-                        branch: rule.branch
-                    });
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                }
-                catch (error) {
-                    this.logger.error(`  Error getting branch: ${rule.branch}: ${error.message}`);
-                }
                 const params = Object.assign({}, target, rule, {
                     enforce_admins: true,
                     required_pull_request_reviews: null,
@@ -236,14 +225,6 @@ class ModuleRepo {
                     throw new errors_1.BranchProtectionError(params.branch, error);
                 });
             });
-            try {
-                const branchResponse = yield this.octokit.request('GET /repos/{owner}/{repo}/branches', { owner: this.owner, repo: this.repo });
-                this.logger.info(`Got branches: ${JSON.stringify(branchResponse.data, null, 2)}`);
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            }
-            catch (error) {
-                this.logger.error(`Error listing branches: ${error.message}`);
-            }
             // Set https://docs.github.com/en/rest/reference/branches#update-branch-protection
             this.logger.info(`Updating branch protection for repo ${this.owner}/${this.repo}`);
             const branchRules = [

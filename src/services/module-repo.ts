@@ -120,19 +120,6 @@ export class ModuleRepo {
       target: {owner: string; repo: string},
       rule: BranchProtection
     ): Promise<unknown> => {
-      try {
-        await octokit.request('GET /repos/{owner}/{repo}/branches/{branch}', {
-          owner: target.owner,
-          repo: target.repo,
-          branch: rule.branch
-        })
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (error: any) {
-        this.logger.error(
-          `  Error getting branch: ${rule.branch}: ${error.message}`
-        )
-      }
-
       const params = Object.assign({}, target, rule, {
         enforce_admins: true,
         required_pull_request_reviews: null,
@@ -155,19 +142,6 @@ export class ModuleRepo {
         .catch(error => {
           throw new BranchProtectionError(params.branch, error)
         })
-    }
-
-    try {
-      const branchResponse = await this.octokit.request(
-        'GET /repos/{owner}/{repo}/branches',
-        {owner: this.owner, repo: this.repo}
-      )
-      this.logger.info(
-        `Got branches: ${JSON.stringify(branchResponse.data, null, 2)}`
-      )
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      this.logger.error(`Error listing branches: ${error.message}`)
     }
 
     // Set https://docs.github.com/en/rest/reference/branches#update-branch-protection
