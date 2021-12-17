@@ -30,7 +30,7 @@ async function run(): Promise<void> {
       strict
     })
 
-    core.setOutput('repoUrl', repoUrl)
+    core.setOutput('repo_url', repoUrl)
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
   }
