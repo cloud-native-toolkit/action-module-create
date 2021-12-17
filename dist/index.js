@@ -80,6 +80,7 @@ run().catch(error => core.error(error.message));
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.isBranchProtectionError = exports.BranchProtectionErrors = exports.BranchProtectionError = void 0;
 class BranchProtectionError extends Error {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     constructor(branch, error) {
         super(`Error updating branch protection for ${branch} branch`);
         this.branch = branch;
@@ -360,6 +361,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ModuleService = void 0;
 const module_repo_1 = __nccwpck_require__(1170);
+const logger_1 = __nccwpck_require__(6566);
+const typescript_ioc_1 = __nccwpck_require__(1444);
 const templateRepos = {
     gitops: {
         template_owner: 'cloud-native-toolkit',
@@ -397,13 +400,20 @@ const buildDescription = (repoType, baseName, provider) => {
 class ModuleService {
     run({ octokit, repoType, baseName, provider, owner }) {
         return __awaiter(this, void 0, void 0, function* () {
+            const logger = typescript_ioc_1.Container.get(logger_1.LoggerApi);
             const templateRepo = this.getTemplateRepo(repoType);
             const { name, description } = buildNameAndDescription(repoType, baseName, provider);
             const repo = yield module_repo_1.ModuleRepo.createFromTemplate(octokit, templateRepo, owner, name, description);
             yield repo.updateSettings();
             yield repo.addDefaultLabels();
             yield repo.createPagesSite();
-            yield repo.addBranchProtection();
+            try {
+                yield repo.addBranchProtection();
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            }
+            catch (error) {
+                logger.warning(error.message);
+            }
             yield repo.createInitialRelease();
             return { repoUrl: `https://github.com/${owner}/${name}` };
         });

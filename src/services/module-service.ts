@@ -1,5 +1,7 @@
 import {Octokit} from '@octokit/action'
 import {ModuleRepo} from './module-repo'
+import {LoggerApi} from '../util/logger'
+import {Container} from 'typescript-ioc'
 
 interface TemplateRepo {
   template_owner: string
@@ -81,6 +83,8 @@ export class ModuleService {
     provider,
     owner
   }: ModuleServiceParams): Promise<{repoUrl: string}> {
+    const logger: LoggerApi = Container.get(LoggerApi)
+
     const templateRepo: TemplateRepo = this.getTemplateRepo(repoType)
 
     const {name, description} = buildNameAndDescription(
@@ -103,7 +107,13 @@ export class ModuleService {
 
     await repo.createPagesSite()
 
-    await repo.addBranchProtection()
+    try {
+      await repo.addBranchProtection()
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      logger.warning(error.message)
+    }
 
     await repo.createInitialRelease()
 

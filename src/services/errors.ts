@@ -4,9 +4,7 @@ export class BranchProtectionError extends Error {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(branch: string, error: any) {
-    super(
-      `Error updating branch protection for ${branch} branch`
-    )
+    super(`Error updating branch protection for ${branch} branch`)
     this.branch = branch
     this.error = error
   }
