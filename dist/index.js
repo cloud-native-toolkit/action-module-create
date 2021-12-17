@@ -72,6 +72,46 @@ run().catch(error => core.error(error.message));
 
 /***/ }),
 
+/***/ 9309:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.isBranchProtectionError = exports.BranchProtectionErrors = exports.BranchProtectionError = void 0;
+class BranchProtectionError extends Error {
+    constructor(branch, error) {
+        super(`Error updating branch protection for ${branch} branch`);
+        this.branch = branch;
+        this.error = error;
+    }
+}
+exports.BranchProtectionError = BranchProtectionError;
+class BranchProtectionErrors extends Error {
+    constructor(errors = []) {
+        super(`Error updating branch protection for branch(es): ${JSON.stringify(errors.map(e => e.branch))}`);
+        this._errors = errors;
+    }
+    errors() {
+        return this._errors.slice();
+    }
+    branches() {
+        return this._errors.map(e => e.branch);
+    }
+}
+exports.BranchProtectionErrors = BranchProtectionErrors;
+const isBranchProtectionError = (
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+error) => {
+    return (error &&
+        !!error.branch &&
+        !!error.error);
+};
+exports.isBranchProtectionError = isBranchProtectionError;
+
+
+/***/ }),
+
 /***/ 2724:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -89,6 +129,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 __exportStar(__nccwpck_require__(5464), exports);
+__exportStar(__nccwpck_require__(9309), exports);
 
 
 /***/ }),
@@ -116,7 +157,7 @@ exports.ModuleRepo = void 0;
 const p_limit_1 = __importDefault(__nccwpck_require__(3783));
 const logger_1 = __nccwpck_require__(6566);
 const typescript_ioc_1 = __nccwpck_require__(1444);
-const util_1 = __nccwpck_require__(3837);
+const errors_1 = __nccwpck_require__(9309);
 class ModuleRepo {
     constructor(owner, repo, octokit) {
         this.owner = owner;
@@ -191,7 +232,7 @@ class ModuleRepo {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 params)
                     .catch(error => {
-                    throw new Error(`    Error updating branch protection for ${params.branch} branch: ${JSON.stringify(error, null, 2)}`);
+                    throw new errors_1.BranchProtectionError(params.branch, error);
                 });
             });
             try {
@@ -228,9 +269,9 @@ class ModuleRepo {
                 .map((p) => __awaiter(this, void 0, void 0, function* () { 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             return p.catch((error) => __awaiter(this, void 0, void 0, function* () { return Promise.resolve(error); })); })));
-            const errors = result.filter(util_1.types.isNativeError);
+            const errors = result.filter(errors_1.isBranchProtectionError);
             if (errors.length > 0) {
-                throw errors[0];
+                throw new errors_1.BranchProtectionErrors(errors);
             }
         });
     }

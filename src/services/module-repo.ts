@@ -3,7 +3,11 @@ import {Octokit, RestEndpointMethodTypes} from '@octokit/action'
 import {LimitFunction, default as pLimit} from 'p-limit'
 import {LoggerApi} from '../util/logger'
 import {Container} from 'typescript-ioc'
-import {types} from 'util'
+import {
+  BranchProtectionError,
+  BranchProtectionErrors,
+  isBranchProtectionError
+} from './errors'
 
 type CreateUsingTemplateParams =
   RestEndpointMethodTypes['repos']['createUsingTemplate']['parameters']
@@ -149,11 +153,7 @@ export class ModuleRepo {
           params as any
         )
         .catch(error => {
-          throw new Error(
-            `    Error updating branch protection for ${
-              params.branch
-            } branch: ${JSON.stringify(error, null, 2)}`
-          )
+          throw new BranchProtectionError(params.branch, error)
         })
     }
 
@@ -204,9 +204,11 @@ export class ModuleRepo {
         )
     )
 
-    const errors: Error[] = result.filter(types.isNativeError)
+    const errors: BranchProtectionError[] = result.filter(
+      isBranchProtectionError
+    )
     if (errors.length > 0) {
-      throw errors[0]
+      throw new BranchProtectionErrors(errors)
     }
   }
 
