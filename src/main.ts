@@ -15,7 +15,9 @@ async function run(): Promise<void> {
     const owner: string = core.getInput('owner')
     const baseName: string = core.getInput('name')
     const provider: string = core.getInput('provider')
+    const strict: boolean = core.getBooleanInput('strict')
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const octokit: Octokit = github.getOctokit(token) as any
 
     const service: ModuleService = new ModuleService()
@@ -24,7 +26,8 @@ async function run(): Promise<void> {
       repoType,
       owner,
       baseName,
-      provider
+      provider,
+      strict
     })
 
     core.setOutput('repoUrl', repoUrl)

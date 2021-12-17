@@ -42,3 +42,16 @@ export const isBranchProtectionError = (
     !!(error as BranchProtectionError).error
   )
 }
+
+export class ExistingRepoError extends Error {}
+
+export const isExistingRepoError = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  error: any
+): error is ExistingRepoError => {
+  return (
+    error &&
+    (error as ExistingRepoError).message ===
+      'Unprocessable Entity: "Could not clone: Name already exists on this account"'
+  )
+}

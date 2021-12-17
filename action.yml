@@ -18,6 +18,10 @@ inputs:
     required: true
     description: The github organization where the new repository should be created
     default: cloud-native-toolkit
+  strict:
+    required: false
+    description: Flag that if value is true with throw an error if the repo already exists. If false then the existing repo will be (re-)configured
+    default: true
 outputs:
   repo_url:
     description: The url of the created repository

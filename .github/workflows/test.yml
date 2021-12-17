@@ -32,3 +32,4 @@ jobs:
           provider: aws
           type: ${{ matrix.repo_type }}
           name: action-test
+          strict: false

@@ -50,6 +50,8 @@ function run() {
             const owner = core.getInput('owner');
             const baseName = core.getInput('name');
             const provider = core.getInput('provider');
+            const strict = core.getBooleanInput('strict');
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const octokit = github.getOctokit(token);
             const service = new services_1.ModuleService();
             const { repoUrl } = yield service.run({
@@ -57,7 +59,8 @@ function run() {
                 repoType,
                 owner,
                 baseName,
-                provider
+                provider,
+                strict
             });
             core.setOutput('repoUrl', repoUrl);
         }
@@ -78,7 +81,7 @@ run().catch(error => core.error(error.message));
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.isBranchProtectionError = exports.BranchProtectionErrors = exports.BranchProtectionError = void 0;
+exports.isExistingRepoError = exports.ExistingRepoError = exports.isBranchProtectionError = exports.BranchProtectionErrors = exports.BranchProtectionError = void 0;
 class BranchProtectionError extends Error {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     constructor(branch, error) {
@@ -109,6 +112,17 @@ error) => {
         !!error.error);
 };
 exports.isBranchProtectionError = isBranchProtectionError;
+class ExistingRepoError extends Error {
+}
+exports.ExistingRepoError = ExistingRepoError;
+const isExistingRepoError = (
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+error) => {
+    return (error &&
+        error.message ===
+            'Unprocessable Entity: "Could not clone: Name already exists on this account"');
+};
+exports.isExistingRepoError = isExistingRepoError;
 
 
 /***/ }),
@@ -167,7 +181,7 @@ class ModuleRepo {
         this.limit = (0, p_limit_1.default)(1);
         this.logger = typescript_ioc_1.Container.get(logger_1.LoggerApi);
     }
-    static createFromTemplate(octokit, templateRepo, owner, name, description) {
+    static createFromTemplate({ octokit, templateRepo, owner, name, description, strict }) {
         return __awaiter(this, void 0, void 0, function* () {
             const logger = typescript_ioc_1.Container.get(logger_1.LoggerApi);
             const createParams = {
@@ -181,8 +195,17 @@ class ModuleRepo {
             };
             // See https://docs.github.com/en/rest/reference/repos#create-a-repository-using-a-template
             logger.info(`Creating repo ${owner}/${name} from template ${templateRepo.template_owner}/${templateRepo.template_repo}`);
-            yield octokit.request('POST /repos/{template_owner}/{template_repo}/generate', createParams);
-            return new ModuleRepo(owner, name, octokit);
+            try {
+                yield octokit.request('POST /repos/{template_owner}/{template_repo}/generate', createParams);
+                return new ModuleRepo(owner, name, octokit);
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            }
+            catch (error) {
+                if (!strict && (0, errors_1.isExistingRepoError)(error)) {
+                    return new ModuleRepo(owner, name, octokit);
+                }
+                throw error;
+            }
         });
     }
     updateSettings() {
@@ -379,7 +402,7 @@ const buildDescription = (repoType, baseName, provider) => {
     return `Module to provision ${baseName}`;
 };
 class ModuleService {
-    run({ octokit, repoType, baseName, provider, owner }) {
+    run({ octokit, repoType, baseName, provider, owner, strict }) {
         return __awaiter(this, void 0, void 0, function* () {
             const logger = typescript_ioc_1.Container.get(logger_1.LoggerApi);
             const logWarning = (
@@ -389,12 +412,19 @@ class ModuleService {
             };
             const templateRepo = this.getTemplateRepo(repoType);
             const { name, description } = buildNameAndDescription(repoType, baseName, provider);
-            const repo = yield module_repo_1.ModuleRepo.createFromTemplate(octokit, templateRepo, owner, name, description);
+            const repo = yield module_repo_1.ModuleRepo.createFromTemplate({
+                octokit,
+                templateRepo,
+                owner,
+                name,
+                description,
+                strict
+            });
             yield repo.updateSettings();
-            yield repo.addDefaultLabels();
+            yield repo.addDefaultLabels().catch(logWarning);
             yield repo.createPagesSite();
             yield repo.addBranchProtection().catch(logWarning);
-            yield repo.createInitialRelease();
+            yield repo.createInitialRelease().catch(logWarning);
             return { repoUrl: `https://github.com/${owner}/${name}` };
         });
     }

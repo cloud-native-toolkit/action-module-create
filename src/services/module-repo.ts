@@ -6,7 +6,8 @@ import {Container} from 'typescript-ioc'
 import {
   BranchProtectionError,
   BranchProtectionErrors,
-  isBranchProtectionError
+  isBranchProtectionError,
+  isExistingRepoError
 } from './errors'
 
 type CreateUsingTemplateParams =
@@ -46,6 +47,15 @@ interface Label {
   color: string
 }
 
+export interface CreateFromTemplateParams {
+  octokit: Octokit
+  templateRepo: TemplateRepo
+  owner: string
+  name: string
+  description: string
+  strict?: boolean
+}
+
 export class ModuleRepo {
   private readonly limit: LimitFunction
   private logger: LoggerApi
@@ -59,13 +69,14 @@ export class ModuleRepo {
     this.logger = Container.get(LoggerApi)
   }
 
-  static async createFromTemplate(
-    octokit: Octokit,
-    templateRepo: TemplateRepo,
-    owner: string,
-    name: string,
-    description: string
-  ): Promise<ModuleRepo> {
+  static async createFromTemplate({
+    octokit,
+    templateRepo,
+    owner,
+    name,
+    description,
+    strict
+  }: CreateFromTemplateParams): Promise<ModuleRepo> {
     const logger: LoggerApi = Container.get(LoggerApi)
 
     const createParams: CreateUsingTemplateParams = {
@@ -82,12 +93,21 @@ export class ModuleRepo {
     logger.info(
       `Creating repo ${owner}/${name} from template ${templateRepo.template_owner}/${templateRepo.template_repo}`
     )
-    await octokit.request(
-      'POST /repos/{template_owner}/{template_repo}/generate',
-      createParams
-    )
+    try {
+      await octokit.request(
+        'POST /repos/{template_owner}/{template_repo}/generate',
+        createParams
+      )
 
-    return new ModuleRepo(owner, name, octokit)
+      return new ModuleRepo(owner, name, octokit)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      if (!strict && isExistingRepoError(error)) {
+        return new ModuleRepo(owner, name, octokit)
+      }
+
+      throw error
+    }
   }
 
   async updateSettings(): Promise<void> {

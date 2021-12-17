@@ -73,6 +73,7 @@ export interface ModuleServiceParams {
   owner: string
   baseName: string
   provider?: string
+  strict?: boolean
 }
 
 export class ModuleService {
@@ -81,7 +82,8 @@ export class ModuleService {
     repoType,
     baseName,
     provider,
-    owner
+    owner,
+    strict
   }: ModuleServiceParams): Promise<{repoUrl: string}> {
     const logger: LoggerApi = Container.get(LoggerApi)
 
@@ -100,23 +102,24 @@ export class ModuleService {
       provider
     )
 
-    const repo: ModuleRepo = await ModuleRepo.createFromTemplate(
+    const repo: ModuleRepo = await ModuleRepo.createFromTemplate({
       octokit,
       templateRepo,
       owner,
       name,
-      description
-    )
+      description,
+      strict
+    })
 
     await repo.updateSettings()
 
-    await repo.addDefaultLabels()
+    await repo.addDefaultLabels().catch(logWarning)
 
     await repo.createPagesSite()
 
     await repo.addBranchProtection().catch(logWarning)
 
-    await repo.createInitialRelease()
+    await repo.createInitialRelease().catch(logWarning)
 
     return {repoUrl: `https://github.com/${owner}/${name}`}
   }
