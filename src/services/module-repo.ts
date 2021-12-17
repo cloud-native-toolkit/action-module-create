@@ -3,6 +3,7 @@ import {Octokit, RestEndpointMethodTypes} from '@octokit/action'
 import {LimitFunction, default as pLimit} from 'p-limit'
 import {LoggerApi} from '../util/logger'
 import {Container} from 'typescript-ioc'
+import {types} from 'util'
 
 type CreateUsingTemplateParams =
   RestEndpointMethodTypes['repos']['createUsingTemplate']['parameters']
@@ -189,14 +190,24 @@ export class ModuleRepo {
         }
       }
     ]
-    await Promise.all(
-      branchRules.map(
-        updateBranchProtectionLimiter(this.octokit, this.limit, {
-          owner: this.owner,
-          repo: this.repo
-        })
-      )
+    const result = await Promise.all(
+      branchRules
+        .map(
+          updateBranchProtectionLimiter(this.octokit, this.limit, {
+            owner: this.owner,
+            repo: this.repo
+          })
+        )
+        .map(async (p: Promise<unknown>) =>
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          p.catch(async (error: any) => Promise.resolve(error))
+        )
     )
+
+    const errors: Error[] = result.filter(types.isNativeError)
+    if (errors.length > 0) {
+      throw errors[0]
+    }
   }
 
   async addDefaultLabels(): Promise<void> {

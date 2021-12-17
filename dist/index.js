@@ -116,6 +116,7 @@ exports.ModuleRepo = void 0;
 const p_limit_1 = __importDefault(__nccwpck_require__(3783));
 const logger_1 = __nccwpck_require__(6566);
 const typescript_ioc_1 = __nccwpck_require__(1444);
+const util_1 = __nccwpck_require__(3837);
 class ModuleRepo {
     constructor(owner, repo, octokit) {
         this.owner = owner;
@@ -219,10 +220,18 @@ class ModuleRepo {
                     }
                 }
             ];
-            yield Promise.all(branchRules.map(updateBranchProtectionLimiter(this.octokit, this.limit, {
+            const result = yield Promise.all(branchRules
+                .map(updateBranchProtectionLimiter(this.octokit, this.limit, {
                 owner: this.owner,
                 repo: this.repo
-            })));
+            }))
+                .map((p) => __awaiter(this, void 0, void 0, function* () { 
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            return p.catch((error) => __awaiter(this, void 0, void 0, function* () { return Promise.resolve(error); })); })));
+            const errors = result.filter(util_1.types.isNativeError);
+            if (errors.length > 0) {
+                throw errors[0];
+            }
         });
     }
     addDefaultLabels() {
@@ -351,9 +360,9 @@ class ModuleService {
             const { name, description } = buildNameAndDescription(repoType, baseName, provider);
             const repo = yield module_repo_1.ModuleRepo.createFromTemplate(octokit, templateRepo, owner, name, description);
             yield repo.updateSettings();
-            yield repo.addBranchProtection();
             yield repo.addDefaultLabels();
             yield repo.createPagesSite();
+            yield repo.addBranchProtection();
             yield repo.createInitialRelease();
             return { repoUrl: `https://github.com/${owner}/${name}` };
         });
