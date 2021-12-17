@@ -1,19 +1,39 @@
 import * as core from '@actions/core'
-import {wait} from './wait'
+import * as github from '@actions/github'
+import {Octokit} from '@octokit/action'
+import {Container} from 'typescript-ioc'
+import {ModuleService} from './services'
+import {LoggerApi} from './util/logger'
+import {ActionLogger} from './util/logger/logger.action'
 
 async function run(): Promise<void> {
   try {
-    const ms: string = core.getInput('milliseconds')
-    core.debug(`Waiting ${ms} milliseconds ...`) // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
+    Container.bind(LoggerApi).to(ActionLogger)
 
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
+    const token: string = core.getInput('token')
+    const repoType: string = core.getInput('type')
+    const owner: string = core.getInput('owner')
+    const baseName: string = core.getInput('name')
+    const provider: string = core.getInput('provider')
+    const strict: boolean = core.getBooleanInput('strict')
 
-    core.setOutput('time', new Date().toTimeString())
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const octokit: Octokit = github.getOctokit(token) as any
+
+    const service: ModuleService = new ModuleService()
+    const {repoUrl} = await service.run({
+      octokit,
+      repoType,
+      owner,
+      baseName,
+      provider,
+      strict
+    })
+
+    core.setOutput('repoUrl', repoUrl)
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
   }
 }
 
-run()
+run().catch(error => core.error(error.message))
