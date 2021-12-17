@@ -198,6 +198,14 @@ class ModuleRepo {
                     throw new Error(`    Error updating branch protection for ${params.branch} branch: ${JSON.stringify(error, null, 2)}`);
                 });
             });
+            try {
+                const branchResponse = yield this.octokit.request('GET /repos/{owner}/{repo}/branches', { owner: this.owner, repo: this.repo });
+                this.logger.info(`Got branches: ${JSON.stringify(branchResponse.data, null, 2)}`);
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            }
+            catch (error) {
+                this.logger.error(`Error listing branches: ${error.message}`);
+            }
             // Set https://docs.github.com/en/rest/reference/branches#update-branch-protection
             this.logger.info(`Updating branch protection for repo ${this.owner}/${this.repo}`);
             const branchRules = [
