@@ -26,6 +26,7 @@ interface BranchRuleCheckCheck {
 
 interface BranchRuleCheck {
   strict: boolean
+  contexts: string[]
   checks: BranchRuleCheckCheck[]
 }
 
@@ -120,33 +121,21 @@ export class ModuleRepo {
           repo: target.repo,
           branch: rule.branch
         })
-      } catch (error) {
-        this.logger.error(`  Error getting branch: ${rule.branch}`)
-      }
-
-      try {
-        const result = await octokit.request(
-          'GET /repos/{owner}/{repo}/branches/{branch}/protection',
-          {
-            owner: target.owner,
-            repo: target.repo,
-            branch: rule.branch
-          }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        this.logger.error(
+          `  Error getting branch: ${rule.branch}: ${error.message}`
         )
-
-        this.logger.info(
-          `  Retrieved branch protection for ${rule.branch}: ${JSON.stringify(
-            result.data,
-            null,
-            2
-          )}`
-        )
-      } catch (error) {
-        this.logger.error(`  Error getting branch protection: ${rule.branch}`)
       }
 
       const params = Object.assign({}, target, rule, {
-        contexts: rule.required_status_checks?.checks.map(v => v.context)
+        enforce_admins: true,
+        required_pull_request_reviews: null,
+        restrictions: {
+          users: [],
+          teams: [],
+          apps: []
+        }
       })
 
       this.logger.info(
@@ -192,6 +181,7 @@ export class ModuleRepo {
         branch: 'main',
         required_status_checks: {
           strict: true,
+          contexts: ['verifyMetadata', 'verify (ocp4_latest)'],
           checks: [
             {context: 'verifyMetadata'},
             {context: 'verify (ocp4_latest)'}
