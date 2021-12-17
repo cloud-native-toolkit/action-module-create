@@ -165,6 +165,27 @@ class ModuleRepo {
             };
             const updateBranchProtection = (octokit, target, rule) => __awaiter(this, void 0, void 0, function* () {
                 var _a;
+                try {
+                    yield octokit.request('GET /repos/{owner}/{repo}/branches/{branch}', {
+                        owner: target.owner,
+                        repo: target.repo,
+                        branch: rule.branch
+                    });
+                }
+                catch (error) {
+                    this.logger.error(`  Error getting branch: ${rule.branch}`);
+                }
+                try {
+                    const result = yield octokit.request('GET /repos/{owner}/{repo}/branches/{branch}/protection', {
+                        owner: target.owner,
+                        repo: target.repo,
+                        branch: rule.branch
+                    });
+                    this.logger.info(`  Retrieved branch protection for ${rule.branch}: ${JSON.stringify(result.data, null, 2)}`);
+                }
+                catch (error) {
+                    this.logger.error(`  Error getting branch protection: ${rule.branch}`);
+                }
                 const params = Object.assign({}, target, rule, {
                     contexts: (_a = rule.required_status_checks) === null || _a === void 0 ? void 0 : _a.checks.map(v => v.context)
                 });
