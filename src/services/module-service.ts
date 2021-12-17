@@ -85,6 +85,13 @@ export class ModuleService {
   }: ModuleServiceParams): Promise<{repoUrl: string}> {
     const logger: LoggerApi = Container.get(LoggerApi)
 
+    const logWarning = (
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      error: any
+    ): void => {
+      logger.warning(error.message)
+    }
+
     const templateRepo: TemplateRepo = this.getTemplateRepo(repoType)
 
     const {name, description} = buildNameAndDescription(
@@ -107,13 +114,7 @@ export class ModuleService {
 
     await repo.createPagesSite()
 
-    try {
-      await repo.addBranchProtection()
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      logger.warning(error.message)
-    }
+    await repo.addBranchProtection().catch(logWarning)
 
     await repo.createInitialRelease()
 

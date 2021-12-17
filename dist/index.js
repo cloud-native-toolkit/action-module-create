@@ -401,19 +401,18 @@ class ModuleService {
     run({ octokit, repoType, baseName, provider, owner }) {
         return __awaiter(this, void 0, void 0, function* () {
             const logger = typescript_ioc_1.Container.get(logger_1.LoggerApi);
+            const logWarning = (
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            error) => {
+                logger.warning(error.message);
+            };
             const templateRepo = this.getTemplateRepo(repoType);
             const { name, description } = buildNameAndDescription(repoType, baseName, provider);
             const repo = yield module_repo_1.ModuleRepo.createFromTemplate(octokit, templateRepo, owner, name, description);
             yield repo.updateSettings();
             yield repo.addDefaultLabels();
             yield repo.createPagesSite();
-            try {
-                yield repo.addBranchProtection();
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            }
-            catch (error) {
-                logger.warning(error.message);
-            }
+            yield repo.addBranchProtection().catch(logWarning);
             yield repo.createInitialRelease();
             return { repoUrl: `https://github.com/${owner}/${name}` };
         });
