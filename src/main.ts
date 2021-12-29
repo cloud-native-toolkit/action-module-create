@@ -23,6 +23,7 @@ async function run(): Promise<void> {
     const service: ModuleService = new ModuleService()
     const {repoUrl} = await service.run({
       octokit,
+      repoCredentials: {username: '', password: token},
       repoType,
       owner,
       baseName,

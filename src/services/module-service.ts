@@ -69,21 +69,25 @@ const buildDescription = (
 
 export interface ModuleServiceParams {
   octokit: Octokit
+  repoCredentials: {username: string; password: string}
   repoType: string
   owner: string
   baseName: string
   provider?: string
   strict?: boolean
+  softwareProvider?: string
 }
 
 export class ModuleService {
   async run({
     octokit,
+    repoCredentials,
     repoType,
     baseName,
     provider,
     owner,
-    strict
+    strict,
+    softwareProvider
   }: ModuleServiceParams): Promise<{repoUrl: string}> {
     const logger: LoggerApi = Container.get(LoggerApi)
 
@@ -117,11 +121,24 @@ export class ModuleService {
 
     await repo.createPagesSite()
 
+    const repoUrl = `https://github.com/${owner}/${name}`
+
+    await repo
+      .updateMetadata({
+        repoUrl,
+        repoCredentials,
+        name,
+        type: repoType,
+        cloudProvider: provider,
+        softwareProvider
+      })
+      .catch(logWarning)
+
     await repo.addBranchProtection().catch(logWarning)
 
     await repo.createInitialRelease().catch(logWarning)
 
-    return {repoUrl: `https://github.com/${owner}/${name}`}
+    return {repoUrl}
   }
 
   private getTemplateRepo(repoType: string): TemplateRepo {

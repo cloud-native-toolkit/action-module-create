@@ -14,6 +14,9 @@ inputs:
   provider:
     required: false
     description: The cloud provider this module will work against
+  softwareProvider:
+    required: false
+    description: The software provider for this module
   owner:
     required: true
     description: The github organization where the new repository should be created
