@@ -348,7 +348,7 @@ class ModuleRepo {
             yield this.octokit.request('POST /repos/{owner}/{repo}/releases', releaseParams);
         });
     }
-    updateMetadata({ repoUrl, repoCredentials, name, type, cloudProvider, softwareProvider }) {
+    updateMetadata({ repoUrl, repoCredentials, name, baseName, type, cloudProvider, softwareProvider }) {
         return __awaiter(this, void 0, void 0, function* () {
             const gitApi = yield (0, git_client_1.apiFromUrl)(repoUrl, repoCredentials);
             this.logger.info(`Updating metadata with name: ${name}`);
@@ -363,8 +363,8 @@ class ModuleRepo {
                 .branch()
                 .then(result => result.current);
             const description = type === 'gitops'
-                ? `Module to populate a gitops repo with the resources to provision ${name}`
-                : `Module to provision ${name} on ${cloudProvider}`;
+                ? `Module to populate a gitops repo with the resources to provision ${baseName}`
+                : `Module to provision ${baseName} on ${cloudProvider}`;
             const metadataValues = Object.assign({
                 name,
                 description,
@@ -478,6 +478,7 @@ class ModuleService {
                 repoUrl,
                 repoCredentials,
                 name: moduleName,
+                baseName,
                 type: repoType,
                 cloudProvider: provider,
                 softwareProvider

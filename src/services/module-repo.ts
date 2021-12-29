@@ -70,6 +70,7 @@ export interface UpdateMetadataParams {
     password: string
   }
   name: string
+  baseName: string
   type: string
   cloudProvider?: string
   softwareProvider?: string
@@ -309,6 +310,7 @@ export class ModuleRepo {
     repoUrl,
     repoCredentials,
     name,
+    baseName,
     type,
     cloudProvider,
     softwareProvider
@@ -331,8 +333,8 @@ export class ModuleRepo {
 
     const description: string =
       type === 'gitops'
-        ? `Module to populate a gitops repo with the resources to provision ${name}`
-        : `Module to provision ${name} on ${cloudProvider}`
+        ? `Module to populate a gitops repo with the resources to provision ${baseName}`
+        : `Module to provision ${baseName} on ${cloudProvider}`
 
     const metadataValues = Object.assign(
       {

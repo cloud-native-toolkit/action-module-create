@@ -144,6 +144,7 @@ export class ModuleService {
         repoUrl,
         repoCredentials,
         name: moduleName,
+        baseName,
         type: repoType,
         cloudProvider: provider,
         softwareProvider
