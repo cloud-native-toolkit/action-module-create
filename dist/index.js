@@ -360,14 +360,14 @@ class ModuleRepo {
             const description = type === 'gitops'
                 ? `Module to populate a gitops repo with the resources to provision ${name}`
                 : `Module to provision ${name} on ${cloudProvider}`;
-            // update values in module.yaml
-            yield yaml_file_1.YamlFile.update(`${repoDir}/module.yaml`, {
+            const metadataValues = Object.assign({
                 name,
                 description,
-                type,
-                cloudProvider,
-                softwareProvider
-            });
+                type
+            }, cloudProvider ? { cloudProvider } : {}, softwareProvider ? { softwareProvider } : {});
+            // update values in module.yaml
+            const yamlFile = yield yaml_file_1.YamlFile.update(`${repoDir}/module.yaml`, metadataValues);
+            this.logger.info(`Updated metadata: ${JSON.stringify(yamlFile.contents)}`);
             const message = 'Updates module.yaml with name and description';
             // push changes
             git.add('.');

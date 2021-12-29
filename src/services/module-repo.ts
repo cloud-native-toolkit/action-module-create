@@ -329,14 +329,22 @@ export class ModuleRepo {
         ? `Module to populate a gitops repo with the resources to provision ${name}`
         : `Module to provision ${name} on ${cloudProvider}`
 
+    const metadataValues = Object.assign(
+      {
+        name,
+        description,
+        type
+      },
+      cloudProvider ? {cloudProvider} : {},
+      softwareProvider ? {softwareProvider} : {}
+    )
+
     // update values in module.yaml
-    await YamlFile.update<ModuleMetadataModel>(`${repoDir}/module.yaml`, {
-      name,
-      description,
-      type,
-      cloudProvider,
-      softwareProvider
-    })
+    const yamlFile = await YamlFile.update<ModuleMetadataModel>(
+      `${repoDir}/module.yaml`,
+      metadataValues
+    )
+    this.logger.info(`Updated metadata: ${JSON.stringify(yamlFile.contents)}`)
 
     const message = 'Updates module.yaml with name and description'
 
