@@ -316,6 +316,8 @@ export class ModuleRepo {
   }: UpdateMetadataParams): Promise<void> {
     const gitApi: GitApi = await apiFromUrl(repoUrl, repoCredentials)
 
+    this.logger.info(`Updating metadata with name: ${name}`)
+
     const repoDir = `/tmp/repo-${name}`
     const git: SimpleGitWithApi = await gitApi.clone(repoDir, {})
 

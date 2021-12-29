@@ -351,6 +351,7 @@ class ModuleRepo {
     updateMetadata({ repoUrl, repoCredentials, name, type, cloudProvider, softwareProvider }) {
         return __awaiter(this, void 0, void 0, function* () {
             const gitApi = yield (0, git_client_1.apiFromUrl)(repoUrl, repoCredentials);
+            this.logger.info(`Updating metadata with name: ${name}`);
             const repoDir = `/tmp/repo-${name}`;
             const git = yield gitApi.clone(repoDir, {});
             const currentBranch = yield git
