@@ -36,7 +36,6 @@ jobs:
           strict: true
       - name: Delete test repo
         run: |
-          sleep 150
           curl \
             -s \
             -X DELETE \
