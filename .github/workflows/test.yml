@@ -35,6 +35,7 @@ jobs:
           name: action-test
           strict: true
       - run: |
+          sleep 300
           curl \
             -s \
             -X DELETE \
