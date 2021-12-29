@@ -349,8 +349,8 @@ export class ModuleRepo {
     const message = 'Updates module.yaml with name and description'
 
     // push changes
-    git.add('.')
-    git.commit(message)
-    git.push('origin', currentBranch)
+    await git.add('.')
+    await git.commit(message)
+    await git.push('origin', currentBranch)
   }
 }

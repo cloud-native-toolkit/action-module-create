@@ -34,8 +34,9 @@ jobs:
           type: ${{ matrix.repo_type }}
           name: action-test
           strict: true
-      - run: |
-          sleep 300
+      - name: Delete test repo
+        run: |
+          sleep 150
           curl \
             -s \
             -X DELETE \

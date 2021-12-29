@@ -370,9 +370,9 @@ class ModuleRepo {
             this.logger.info(`Updated metadata: ${JSON.stringify(yamlFile.contents)}`);
             const message = 'Updates module.yaml with name and description';
             // push changes
-            git.add('.');
-            git.commit(message);
-            git.push('origin', currentBranch);
+            yield git.add('.');
+            yield git.commit(message);
+            yield git.push('origin', currentBranch);
         });
     }
 }
