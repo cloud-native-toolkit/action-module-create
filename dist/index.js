@@ -353,7 +353,7 @@ class ModuleRepo {
             const gitApi = yield (0, git_client_1.apiFromUrl)(repoUrl, repoCredentials);
             this.logger.info(`Updating metadata with name: ${name}`);
             const repoDir = `/tmp/repo-${name}`;
-            const git = yield gitApi.clone(repoDir, {});
+            const git = yield gitApi.clone(repoDir, { userConfig: { email: 'cloudnativetoolkit@gmail.com', name: 'Cloud Native Toolkit' } });
             const currentBranch = yield git
                 .branch()
                 .then(result => result.current);

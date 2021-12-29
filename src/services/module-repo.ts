@@ -318,7 +318,12 @@ export class ModuleRepo {
     this.logger.info(`Updating metadata with name: ${name}`)
 
     const repoDir = `/tmp/repo-${name}`
-    const git: SimpleGitWithApi = await gitApi.clone(repoDir, {})
+    const git: SimpleGitWithApi = await gitApi.clone(repoDir, {
+      userConfig: {
+        email: 'cloudnativetoolkit@gmail.com',
+        name: 'Cloud Native Toolkit'
+      }
+    })
 
     const currentBranch: string = await git
       .branch()
