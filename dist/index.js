@@ -353,7 +353,12 @@ class ModuleRepo {
             const gitApi = yield (0, git_client_1.apiFromUrl)(repoUrl, repoCredentials);
             this.logger.info(`Updating metadata with name: ${name}`);
             const repoDir = `/tmp/repo-${name}`;
-            const git = yield gitApi.clone(repoDir, { userConfig: { email: 'cloudnativetoolkit@gmail.com', name: 'Cloud Native Toolkit' } });
+            const git = yield gitApi.clone(repoDir, {
+                userConfig: {
+                    email: 'cloudnativetoolkit@gmail.com',
+                    name: 'Cloud Native Toolkit'
+                }
+            });
             const currentBranch = yield git
                 .branch()
                 .then(result => result.current);
@@ -411,19 +416,30 @@ const templateRepos = {
     }
 };
 const buildNameAndDescription = (repoType, baseName, provider) => {
+    const { name, moduleName } = buildName(repoType, baseName, provider);
     return {
-        name: buildName(repoType, baseName, provider),
+        name,
+        moduleName,
         description: buildDescription(repoType, baseName, provider)
     };
 };
 const buildName = (repoType, baseName, provider) => {
     if (repoType === 'gitops') {
-        return `terraform-gitops-${baseName}`;
+        return {
+            name: `terraform-gitops-${baseName}`,
+            moduleName: `gitops-${baseName}`
+        };
     }
     if (provider) {
-        return `terraform-${provider}-${baseName}`;
+        return {
+            name: `terraform-${provider}-${baseName}`,
+            moduleName: `${provider}-${baseName}`
+        };
     }
-    return `terraform-any-${baseName}`;
+    return {
+        name: `terraform-any-${baseName}`,
+        moduleName: baseName
+    };
 };
 const buildDescription = (repoType, baseName, provider) => {
     if (repoType === 'gitops') {
@@ -444,7 +460,7 @@ class ModuleService {
                 logger.warning(error.message);
             };
             const templateRepo = this.getTemplateRepo(repoType);
-            const { name, description } = buildNameAndDescription(repoType, baseName, provider);
+            const { name, description, moduleName } = buildNameAndDescription(repoType, baseName, provider);
             const repo = yield module_repo_1.ModuleRepo.createFromTemplate({
                 octokit,
                 templateRepo,
@@ -461,7 +477,7 @@ class ModuleService {
                 .updateMetadata({
                 repoUrl,
                 repoCredentials,
-                name,
+                name: moduleName,
                 type: repoType,
                 cloudProvider: provider,
                 softwareProvider

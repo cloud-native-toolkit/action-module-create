@@ -22,6 +22,7 @@ const templateRepos: {[type: string]: TemplateRepo} = {
 interface NameAndDescription {
   name: string
   description: string
+  moduleName: string
 }
 
 const buildNameAndDescription = (
@@ -29,8 +30,10 @@ const buildNameAndDescription = (
   baseName: string,
   provider?: string
 ): NameAndDescription => {
+  const {name, moduleName} = buildName(repoType, baseName, provider)
   return {
-    name: buildName(repoType, baseName, provider),
+    name,
+    moduleName,
     description: buildDescription(repoType, baseName, provider)
   }
 }
@@ -39,16 +42,25 @@ const buildName = (
   repoType: string,
   baseName: string,
   provider?: string
-): string => {
+): {name: string; moduleName: string} => {
   if (repoType === 'gitops') {
-    return `terraform-gitops-${baseName}`
+    return {
+      name: `terraform-gitops-${baseName}`,
+      moduleName: `gitops-${baseName}`
+    }
   }
 
   if (provider) {
-    return `terraform-${provider}-${baseName}`
+    return {
+      name: `terraform-${provider}-${baseName}`,
+      moduleName: `${provider}-${baseName}`
+    }
   }
 
-  return `terraform-any-${baseName}`
+  return {
+    name: `terraform-any-${baseName}`,
+    moduleName: baseName
+  }
 }
 
 const buildDescription = (
@@ -104,7 +116,7 @@ export class ModuleService {
 
     const templateRepo: TemplateRepo = this.getTemplateRepo(repoType)
 
-    const {name, description} = buildNameAndDescription(
+    const {name, description, moduleName} = buildNameAndDescription(
       repoType,
       baseName,
       provider
@@ -131,7 +143,7 @@ export class ModuleService {
       .updateMetadata({
         repoUrl,
         repoCredentials,
-        name,
+        name: moduleName,
         type: repoType,
         cloudProvider: provider,
         softwareProvider
