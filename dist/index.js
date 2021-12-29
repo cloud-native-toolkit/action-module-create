@@ -357,8 +357,6 @@ class ModuleRepo {
             const currentBranch = yield git
                 .branch()
                 .then(result => result.current);
-            const devBranch = 'update-metadata';
-            yield git.checkoutBranch(devBranch, `origin/${currentBranch}`);
             const description = type === 'gitops'
                 ? `Module to populate a gitops repo with the resources to provision ${name}`
                 : `Module to provision ${name} on ${cloudProvider}`;
@@ -374,19 +372,7 @@ class ModuleRepo {
             // push changes
             git.add('.');
             git.commit(message);
-            git.push('origin', devBranch);
-            // create PR (with `skip ci` label)
-            const pullRequest = yield gitApi.createPullRequest({
-                title: message,
-                sourceBranch: devBranch,
-                targetBranch: currentBranch
-            });
-            // merge PR
-            yield gitApi.updateAndMergePullRequest({
-                pullNumber: pullRequest.pullNumber,
-                method: 'squash',
-                rateLimit: true
-            });
+            git.push('origin', currentBranch);
         });
     }
 }

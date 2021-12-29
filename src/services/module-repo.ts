@@ -12,7 +12,6 @@ import {
 import {
   apiFromUrl,
   GitApi,
-  PullRequest,
   SimpleGitWithApi
 } from '@cloudnativetoolkit/git-client'
 import {YamlFile} from '../util/yaml-file/yaml-file'
@@ -324,9 +323,6 @@ export class ModuleRepo {
     const currentBranch: string = await git
       .branch()
       .then(result => result.current)
-    const devBranch = 'update-metadata'
-
-    await git.checkoutBranch(devBranch, `origin/${currentBranch}`)
 
     const description: string =
       type === 'gitops'
@@ -347,21 +343,6 @@ export class ModuleRepo {
     // push changes
     git.add('.')
     git.commit(message)
-    git.push('origin', devBranch)
-
-    // create PR (with `skip ci` label)
-
-    const pullRequest: PullRequest = await gitApi.createPullRequest({
-      title: message,
-      sourceBranch: devBranch,
-      targetBranch: currentBranch
-    })
-
-    // merge PR
-    await gitApi.updateAndMergePullRequest({
-      pullNumber: pullRequest.pullNumber,
-      method: 'squash',
-      rateLimit: true
-    })
+    git.push('origin', currentBranch)
   }
 }
