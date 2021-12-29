@@ -21,7 +21,7 @@ async function run(): Promise<void> {
     const octokit: Octokit = github.getOctokit(token) as any
 
     const service: ModuleService = new ModuleService()
-    const {repoUrl} = await service.run({
+    const {repoUrl, repo} = await service.run({
       octokit,
       repoCredentials: {username: '', password: token},
       repoType,
@@ -32,6 +32,8 @@ async function run(): Promise<void> {
     })
 
     core.setOutput('repo_url', repoUrl)
+    core.setOutput('owner', owner)
+    core.setOutput('repo', repo)
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
   }

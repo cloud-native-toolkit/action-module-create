@@ -28,6 +28,10 @@ inputs:
 outputs:
   repo_url:
     description: The url of the created repository
+  owner:
+    description: The owner of the repo
+  repo:
+    description: The name of the repo
 runs:
   using: 'node12'
   main: 'dist/index.js'

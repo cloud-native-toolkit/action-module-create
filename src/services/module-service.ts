@@ -88,7 +88,11 @@ export class ModuleService {
     owner,
     strict,
     softwareProvider
-  }: ModuleServiceParams): Promise<{repoUrl: string}> {
+  }: ModuleServiceParams): Promise<{
+    repoUrl: string
+    owner: string
+    repo: string
+  }> {
     const logger: LoggerApi = Container.get(LoggerApi)
 
     const logWarning = (
@@ -138,7 +142,7 @@ export class ModuleService {
 
     await repo.createInitialRelease().catch(logWarning)
 
-    return {repoUrl}
+    return {repoUrl, owner, repo: name}
   }
 
   private getTemplateRepo(repoType: string): TemplateRepo {

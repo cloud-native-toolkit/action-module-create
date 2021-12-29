@@ -25,7 +25,8 @@ jobs:
           - terraform
     steps:
       - uses: actions/checkout@v2
-      - uses: ./
+      - id: action
+        uses: ./
         with:
           token: ${{ secrets.GIT_ADMIN_TOKEN }}
           owner: cloud-native-toolkit-test
@@ -33,3 +34,9 @@ jobs:
           type: ${{ matrix.repo_type }}
           name: action-test
           strict: false
+      - run: |
+          curl \
+            -X DELETE \
+            -u ${{ secrets.GIT_ADMIN_USERNAME }}:${{ secrets.GIT_ADMIN_TOKEN }}
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/${{ steps.action.outputs.owner }}/${{ steps.action.outputs.repo }}

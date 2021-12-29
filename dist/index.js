@@ -54,7 +54,7 @@ function run() {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const octokit = github.getOctokit(token);
             const service = new services_1.ModuleService();
-            const { repoUrl } = yield service.run({
+            const { repoUrl, repo } = yield service.run({
                 octokit,
                 repoCredentials: { username: '', password: token },
                 repoType,
@@ -64,6 +64,8 @@ function run() {
                 strict
             });
             core.setOutput('repo_url', repoUrl);
+            core.setOutput('owner', owner);
+            core.setOutput('repo', repo);
         }
         catch (error) {
             if (error instanceof Error)
@@ -480,7 +482,7 @@ class ModuleService {
                 .catch(logWarning);
             yield repo.addBranchProtection().catch(logWarning);
             yield repo.createInitialRelease().catch(logWarning);
-            return { repoUrl };
+            return { repoUrl, owner, repo: name };
         });
     }
     getTemplateRepo(repoType) {
