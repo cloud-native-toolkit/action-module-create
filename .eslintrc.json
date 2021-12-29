@@ -49,7 +49,7 @@
       "sort-imports": ["error", {
         "ignoreCase": false,
         "ignoreDeclarationSort": true,
-        "ignoreMemberSort": false,
+        "ignoreMemberSort": true,
         "memberSyntaxSortOrder": ["none", "all", "multiple", "single"],
         "allowSeparatedGroups": true
       }],

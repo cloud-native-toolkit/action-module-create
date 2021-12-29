@@ -14,6 +14,9 @@ inputs:
   provider:
     required: false
     description: The cloud provider this module will work against
+  softwareProvider:
+    required: false
+    description: The software provider for this module
   owner:
     required: true
     description: The github organization where the new repository should be created
@@ -25,6 +28,10 @@ inputs:
 outputs:
   repo_url:
     description: The url of the created repository
+  owner:
+    description: The owner of the repo
+  repo:
+    description: The name of the repo
 runs:
   using: 'node12'
   main: 'dist/index.js'

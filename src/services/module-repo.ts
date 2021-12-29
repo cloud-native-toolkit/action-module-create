@@ -1,6 +1,6 @@
 import {Octokit, RestEndpointMethodTypes} from '@octokit/action'
 // eslint-disable-next-line import/named
-import {LimitFunction, default as pLimit} from 'p-limit'
+import {default as pLimit, LimitFunction} from 'p-limit'
 import {LoggerApi} from '../util/logger'
 import {Container} from 'typescript-ioc'
 import {
@@ -9,6 +9,13 @@ import {
   isBranchProtectionError,
   isExistingRepoError
 } from './errors'
+import {
+  apiFromUrl,
+  GitApi,
+  SimpleGitWithApi
+} from '@cloudnativetoolkit/git-client'
+import {YamlFile} from '../util/yaml-file/yaml-file'
+import {ModuleMetadataModel} from '../models/module-metadata.model'
 
 type CreateUsingTemplateParams =
   RestEndpointMethodTypes['repos']['createUsingTemplate']['parameters']
@@ -54,6 +61,19 @@ export interface CreateFromTemplateParams {
   name: string
   description: string
   strict?: boolean
+}
+
+export interface UpdateMetadataParams {
+  repoUrl: string
+  repoCredentials: {
+    username: string
+    password: string
+  }
+  name: string
+  baseName: string
+  type: string
+  cloudProvider?: string
+  softwareProvider?: string
 }
 
 export class ModuleRepo {
@@ -241,7 +261,8 @@ export class ModuleRepo {
       {name: 'minor', description: 'Release: minor (0.x.0)', color: '94D5A4'},
       {name: 'patch', description: 'Release: patch (0.0.x)', color: '94BBA4'},
       {name: 'chore', description: 'Changelog: chore', color: '000000'},
-      {name: 'feature', description: 'Changelog: feature', color: '0075ca'}
+      {name: 'feature', description: 'Changelog: feature', color: '0075ca'},
+      {name: 'skip ci', description: 'Skip ci validation', color: 'dd0000'}
     ]
     await Promise.all(
       labels.map(
@@ -283,5 +304,60 @@ export class ModuleRepo {
       'POST /repos/{owner}/{repo}/releases',
       releaseParams
     )
+  }
+
+  async updateMetadata({
+    repoUrl,
+    repoCredentials,
+    name,
+    baseName,
+    type,
+    cloudProvider,
+    softwareProvider
+  }: UpdateMetadataParams): Promise<void> {
+    const gitApi: GitApi = await apiFromUrl(repoUrl, repoCredentials)
+
+    this.logger.info(`Updating metadata with name: ${name}`)
+
+    const repoDir = `/tmp/repo-${name}`
+    const git: SimpleGitWithApi = await gitApi.clone(repoDir, {
+      userConfig: {
+        email: 'cloudnativetoolkit@gmail.com',
+        name: 'Cloud Native Toolkit'
+      }
+    })
+
+    const currentBranch: string = await git
+      .branch()
+      .then(result => result.current)
+
+    const description: string =
+      type === 'gitops'
+        ? `Module to populate a gitops repo with the resources to provision ${baseName}`
+        : `Module to provision ${baseName} on ${cloudProvider}`
+
+    const metadataValues = Object.assign(
+      {
+        name,
+        description,
+        type
+      },
+      cloudProvider ? {cloudProvider} : {},
+      softwareProvider ? {softwareProvider} : {}
+    )
+
+    // update values in module.yaml
+    const yamlFile = await YamlFile.update<ModuleMetadataModel>(
+      `${repoDir}/module.yaml`,
+      metadataValues
+    )
+    this.logger.info(`Updated metadata: ${JSON.stringify(yamlFile.contents)}`)
+
+    const message = 'Updates module.yaml with name and description'
+
+    // push changes
+    await git.add('.')
+    await git.commit(message)
+    await git.push('origin', currentBranch)
   }
 }

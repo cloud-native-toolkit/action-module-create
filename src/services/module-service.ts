@@ -22,6 +22,7 @@ const templateRepos: {[type: string]: TemplateRepo} = {
 interface NameAndDescription {
   name: string
   description: string
+  moduleName: string
 }
 
 const buildNameAndDescription = (
@@ -29,8 +30,10 @@ const buildNameAndDescription = (
   baseName: string,
   provider?: string
 ): NameAndDescription => {
+  const {name, moduleName} = buildName(repoType, baseName, provider)
   return {
-    name: buildName(repoType, baseName, provider),
+    name,
+    moduleName,
     description: buildDescription(repoType, baseName, provider)
   }
 }
@@ -39,16 +42,25 @@ const buildName = (
   repoType: string,
   baseName: string,
   provider?: string
-): string => {
+): {name: string; moduleName: string} => {
   if (repoType === 'gitops') {
-    return `terraform-gitops-${baseName}`
+    return {
+      name: `terraform-gitops-${baseName}`,
+      moduleName: `gitops-${baseName}`
+    }
   }
 
   if (provider) {
-    return `terraform-${provider}-${baseName}`
+    return {
+      name: `terraform-${provider}-${baseName}`,
+      moduleName: `${provider}-${baseName}`
+    }
   }
 
-  return `terraform-any-${baseName}`
+  return {
+    name: `terraform-any-${baseName}`,
+    moduleName: baseName
+  }
 }
 
 const buildDescription = (
@@ -69,22 +81,30 @@ const buildDescription = (
 
 export interface ModuleServiceParams {
   octokit: Octokit
+  repoCredentials: {username: string; password: string}
   repoType: string
   owner: string
   baseName: string
   provider?: string
   strict?: boolean
+  softwareProvider?: string
 }
 
 export class ModuleService {
   async run({
     octokit,
+    repoCredentials,
     repoType,
     baseName,
     provider,
     owner,
-    strict
-  }: ModuleServiceParams): Promise<{repoUrl: string}> {
+    strict,
+    softwareProvider
+  }: ModuleServiceParams): Promise<{
+    repoUrl: string
+    owner: string
+    repo: string
+  }> {
     const logger: LoggerApi = Container.get(LoggerApi)
 
     const logWarning = (
@@ -96,7 +116,7 @@ export class ModuleService {
 
     const templateRepo: TemplateRepo = this.getTemplateRepo(repoType)
 
-    const {name, description} = buildNameAndDescription(
+    const {name, description, moduleName} = buildNameAndDescription(
       repoType,
       baseName,
       provider
@@ -117,11 +137,25 @@ export class ModuleService {
 
     await repo.createPagesSite()
 
+    const repoUrl = `https://github.com/${owner}/${name}`
+
+    await repo
+      .updateMetadata({
+        repoUrl,
+        repoCredentials,
+        name: moduleName,
+        baseName,
+        type: repoType,
+        cloudProvider: provider,
+        softwareProvider
+      })
+      .catch(logWarning)
+
     await repo.addBranchProtection().catch(logWarning)
 
     await repo.createInitialRelease().catch(logWarning)
 
-    return {repoUrl: `https://github.com/${owner}/${name}`}
+    return {repoUrl, owner, repo: name}
   }
 
   private getTemplateRepo(repoType: string): TemplateRepo {
