@@ -33,9 +33,10 @@ jobs:
           provider: aws
           type: ${{ matrix.repo_type }}
           name: action-test
-          strict: false
+          strict: true
       - run: |
           curl \
+            -s \
             -X DELETE \
             -u ${{ secrets.GIT_ADMIN_USERNAME }}:${{ secrets.GIT_ADMIN_TOKEN }} \
             -H "Accept: application/vnd.github.v3+json" \
