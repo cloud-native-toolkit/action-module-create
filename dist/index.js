@@ -50,22 +50,28 @@ function run() {
             const owner = core.getInput('owner');
             const baseName = core.getInput('name');
             const provider = core.getInput('provider');
+            const softwareProvider = core.getInput('softwareProvider');
             const strict = core.getBooleanInput('strict');
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const octokit = github.getOctokit(token);
             const service = new services_1.ModuleService();
-            const { repoUrl, repo } = yield service.run({
+            const { repoUrl, repo, moduleName } = yield service.run({
                 octokit,
                 repoCredentials: { username: '', password: token },
                 repoType,
                 owner,
                 baseName,
                 provider,
+                softwareProvider,
                 strict
             });
             core.setOutput('repo_url', repoUrl);
+            core.setOutput('repoUrl', repoUrl);
             core.setOutput('owner', owner);
             core.setOutput('repo', repo);
+            core.setOutput('moduleName', moduleName);
+            core.setOutput('cloudProvider', provider);
+            core.setOutput('softwareProvider', softwareProvider);
         }
         catch (error) {
             if (error instanceof Error)
@@ -486,7 +492,7 @@ class ModuleService {
                 .catch(logWarning);
             yield repo.addBranchProtection().catch(logWarning);
             yield repo.createInitialRelease().catch(logWarning);
-            return { repoUrl, owner, repo: name };
+            return { repoUrl, owner, repo: name, moduleName, cloudProvider: provider, softwareProvider };
         });
     }
     getTemplateRepo(repoType) {

@@ -28,10 +28,18 @@ inputs:
 outputs:
   repo_url:
     description: The url of the created repository
+  repoUrl:
+    description: The url of the created repository
   owner:
     description: The owner of the repo
   repo:
     description: The name of the repo
+  moduleName:
+    description: The name of the module
+  cloudProvider:
+    description: The cloud provider, if applicable, for the module. (E.g. ibm, aws, azure)
+  softwareProvider:
+    description: The provider of the software that will be installed into a cluster, if applicable. (E.g. ibm-cp)
 runs:
   using: 'node12'
   main: 'dist/index.js'

@@ -15,25 +15,31 @@ async function run(): Promise<void> {
     const owner: string = core.getInput('owner')
     const baseName: string = core.getInput('name')
     const provider: string = core.getInput('provider')
+    const softwareProvider: string = core.getInput('softwareProvider')
     const strict: boolean = core.getBooleanInput('strict')
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const octokit: Octokit = github.getOctokit(token) as any
 
     const service: ModuleService = new ModuleService()
-    const {repoUrl, repo} = await service.run({
+    const {repoUrl, repo, moduleName} = await service.run({
       octokit,
       repoCredentials: {username: '', password: token},
       repoType,
       owner,
       baseName,
       provider,
+      softwareProvider,
       strict
     })
 
     core.setOutput('repo_url', repoUrl)
+    core.setOutput('repoUrl', repoUrl)
     core.setOutput('owner', owner)
     core.setOutput('repo', repo)
+    core.setOutput('moduleName', moduleName)
+    core.setOutput('cloudProvider', provider)
+    core.setOutput('softwareProvider', softwareProvider)
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
   }

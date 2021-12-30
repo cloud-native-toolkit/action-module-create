@@ -104,6 +104,9 @@ export class ModuleService {
     repoUrl: string
     owner: string
     repo: string
+    moduleName: string
+    cloudProvider?: string
+    softwareProvider?: string
   }> {
     const logger: LoggerApi = Container.get(LoggerApi)
 
@@ -155,7 +158,14 @@ export class ModuleService {
 
     await repo.createInitialRelease().catch(logWarning)
 
-    return {repoUrl, owner, repo: name}
+    return {
+      repoUrl,
+      owner,
+      repo: name,
+      moduleName,
+      cloudProvider: provider,
+      softwareProvider
+    }
   }
 
   private getTemplateRepo(repoType: string): TemplateRepo {
