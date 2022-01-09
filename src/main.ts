@@ -14,6 +14,7 @@ async function run(): Promise<void> {
     const repoType: string = core.getInput('type')
     const owner: string = core.getInput('owner')
     const baseName: string = core.getInput('name')
+    const displayName: string = core.getInput('displayName')
     const provider: string = core.getInput('provider')
     const softwareProvider: string = core.getInput('softwareProvider')
     const strict: boolean = core.getBooleanInput('strict')
@@ -38,6 +39,7 @@ async function run(): Promise<void> {
     core.setOutput('owner', owner)
     core.setOutput('repo', repo)
     core.setOutput('moduleName', moduleName)
+    core.setOutput('displayName', displayName)
     core.setOutput('cloudProvider', provider)
     core.setOutput('softwareProvider', softwareProvider)
   } catch (error) {

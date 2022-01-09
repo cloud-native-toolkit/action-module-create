@@ -11,6 +11,9 @@ inputs:
   name:
     required: true
     description: The name of the new repository that will be created
+  displayName:
+    required: false
+    description: The display name of the new repository that will be created
   provider:
     required: false
     description: The cloud provider this module will work against
@@ -36,6 +39,8 @@ outputs:
     description: The name of the repo
   moduleName:
     description: The name of the module
+  displayName:
+    description: The display name of the module
   cloudProvider:
     description: The cloud provider, if applicable, for the module. (E.g. ibm, aws, azure)
   softwareProvider:

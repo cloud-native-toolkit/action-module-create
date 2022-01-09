@@ -49,6 +49,7 @@ function run() {
             const repoType = core.getInput('type');
             const owner = core.getInput('owner');
             const baseName = core.getInput('name');
+            const displayName = core.getInput('displayName');
             const provider = core.getInput('provider');
             const softwareProvider = core.getInput('softwareProvider');
             const strict = core.getBooleanInput('strict');
@@ -70,6 +71,7 @@ function run() {
             core.setOutput('owner', owner);
             core.setOutput('repo', repo);
             core.setOutput('moduleName', moduleName);
+            core.setOutput('displayName', displayName);
             core.setOutput('cloudProvider', provider);
             core.setOutput('softwareProvider', softwareProvider);
         }
@@ -492,7 +494,14 @@ class ModuleService {
                 .catch(logWarning);
             yield repo.addBranchProtection().catch(logWarning);
             yield repo.createInitialRelease().catch(logWarning);
-            return { repoUrl, owner, repo: name, moduleName, cloudProvider: provider, softwareProvider };
+            return {
+                repoUrl,
+                owner,
+                repo: name,
+                moduleName,
+                cloudProvider: provider,
+                softwareProvider
+            };
         });
     }
     getTemplateRepo(repoType) {
